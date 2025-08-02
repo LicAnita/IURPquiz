@@ -52,7 +52,7 @@
   <div id="quizForm"></div>
 
   <button onclick="agregarPregunta()">+ Agregar nueva pregunta</button>
-  <button onclick="generarCodigo()">🧾 Generar código</button>
+  <button onclick="generarCodigo()">🗞 Generar código</button>
 
   <h3>Código HTML generado:</h3>
   <textarea id="codigoGenerado" readonly></textarea>
@@ -102,7 +102,10 @@
         respuestas[qid] = select.value;
         i++;
       }
-      html += `<button onclick='revisar()'>Revisar</button><p id='feedback'></p><script>function revisar(){let r=${JSON.stringify(respuestas)};let c=0,t=0;for(let q in r){let ops=document.getElementsByName(q);for(let o of ops){if(o.checked){t++;if(o.value===r[q])c++;}}}document.getElementById('feedback').innerText = 'Obtuviste ' + c + ' de ' + t + ' correctas';}</script></body></html>`;
+
+      let scriptCode = `&lt;script&gt;function revisar(){let r=${JSON.stringify(respuestas)};let c=0,t=0;for(let q in r){let ops=document.getElementsByName(q);for(let o of ops){if(o.checked){t++;if(o.value===r[q])c++;}}}document.getElementById('feedback').innerText = 'Obtuviste ' + c + ' de ' + t + ' correctas';}&lt;/script&gt;`;
+
+      html += `<button onclick='revisar()'>Revisar</button><p id='feedback'></p>${scriptCode}</body></html>`;
 
       document.getElementById('codigoGenerado').value = html;
     }
