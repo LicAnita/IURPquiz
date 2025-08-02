@@ -1,114 +1,384 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de Mini-Quiz 2.0</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #fff0f0;
-      color: #333;
-      padding: 20px;
-    }
-    h1 {
-      color: #b30000;
-    }
-    .input-block {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      background-color: #fff;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input[type="text"], select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-    }
-    button {
-      background-color: #b30000;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      margin-top: 15px;
-      cursor: pointer;
-    }
-    textarea {
-      width: 100%;
-      height: 400px;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Quizzes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #b30000;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .configurador {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .previsualizacion {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .quiz-output {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #b30000;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #990000;
+        }
+        .pregunta {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .opcion {
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+        .quiz-preview {
+            padding: 15px;
+            border: 2px solid #b30000;
+            border-radius: 10px;
+            background-color: #fff0f0;
+            font-family: sans-serif;
+        }
+        .quiz-title {
+            color: #b30000;
+        }
+        .correct-option {
+            background-color: #e6ffe6;
+        }
+    </style>
 </head>
 <body>
-  <h1>🧠 Generador de Mini-Quizzes HTML</h1>
+    <h1>Generador de Quizzes para Docentes</h1>
+    
+    <div class="container">
+        <div class="configurador">
+            <h2>Configura tu Quiz</h2>
+            
+            <div>
+                <label for="quiz-title">Título del Quiz:</label>
+                <input type="text" id="quiz-title" value="🧠 Mini Quiz - Generalidades del aparato locomotor" style="width: 100%;">
+            </div>
+            
+            <div id="preguntas-container">
+                <!-- Las preguntas se agregarán aquí -->
+            </div>
+            
+            <button id="agregar-pregunta">➕ Agregar Pregunta</button>
+            <button id="generar-codigo">Generar Código</button>
+        </div>
+        
+        <div class="previsualizacion">
+            <h2>Previsualización</h2>
+            <div id="quiz-preview" class="quiz-preview">
+                <h3 class="quiz-title" id="preview-title">🧠 Mini Quiz - Generalidades del aparato locomotor</h3>
+                <p>Aquí aparecerá la previsualización de tu quiz...</p>
+            </div>
+            
+            <h3>Código generado:</h3>
+            <textarea id="quiz-output" class="quiz-output" readonly></textarea>
+            <button id="copiar-codigo">Copiar Código</button>
+        </div>
+    </div>
 
-  <div id="quizForm"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let preguntaCount = 0;
+            const preguntasContainer = document.getElementById('preguntas-container');
+            const agregarPreguntaBtn = document.getElementById('agregar-pregunta');
+            const generarCodigoBtn = document.getElementById('generar-codigo');
+            const copiarCodigoBtn = document.getElementById('copiar-codigo');
+            const quizPreview = document.getElementById('quiz-preview');
+            const quizOutput = document.getElementById('quiz-output');
+            const previewTitle = document.getElementById('preview-title');
+            const quizTitleInput = document.getElementById('quiz-title');
+            
+            // Agregar primera pregunta por defecto
+            agregarPregunta();
+            
+            // Event listeners
+            agregarPreguntaBtn.addEventListener('click', agregarPregunta);
+            generarCodigoBtn.addEventListener('click', generarCodigo);
+            copiarCodigoBtn.addEventListener('click', copiarCodigo);
+            quizTitleInput.addEventListener('input', actualizarTituloPreview);
+            
+            function actualizarTituloPreview() {
+                previewTitle.textContent = quizTitleInput.value;
+            }
+            
+            function agregarPregunta() {
+                preguntaCount++;
+                const preguntaId = `pregunta-${preguntaCount}`;
+                
+                const preguntaDiv = document.createElement('div');
+                preguntaDiv.className = 'pregunta';
+                preguntaDiv.id = preguntaId;
+                
+                preguntaDiv.innerHTML = `
+                    <div>
+                        <label><strong>Pregunta ${preguntaCount}:</strong></label>
+                        <input type="text" class="texto-pregunta" placeholder="Texto de la pregunta" style="width: 100%;">
+                    </div>
+                    <div id="opciones-${preguntaId}">
+                        <!-- Opciones se agregarán aquí -->
+                    </div>
+                    <button class="agregar-opcion" data-pregunta="${preguntaId}">➕ Agregar Opción</button>
+                    <button class="eliminar-pregunta" data-pregunta="${preguntaId}">🗑️ Eliminar Pregunta</button>
+                `;
+                
+                preguntasContainer.appendChild(preguntaDiv);
+                
+                // Agregar 3 opciones por defecto
+                const opcionesContainer = document.getElementById(`opciones-${preguntaId}`);
+                for (let i = 0; i < 3; i++) {
+                    agregarOpcion(preguntaId, opcionesContainer);
+                }
+                
+                // Event listeners para los botones de esta pregunta
+                preguntaDiv.querySelector(`.agregar-opcion`).addEventListener('click', function() {
+                    agregarOpcion(preguntaId, opcionesContainer);
+                });
+                
+                preguntaDiv.querySelector(`.eliminar-pregunta`).addEventListener('click', function() {
+                    if (confirm('¿Estás seguro de que quieres eliminar esta pregunta?')) {
+                        preguntasContainer.removeChild(preguntaDiv);
+                        actualizarNumeracionPreguntas();
+                    }
+                });
+                
+                actualizarNumeracionPreguntas();
+                actualizarPreview();
+            }
+            
+            function agregarOpcion(preguntaId, opcionesContainer) {
+                const preguntaNum = preguntaId.split('-')[1];
+                const opcionCount = opcionesContainer.children.length + 1;
+                const opcionId = `opcion-${preguntaId}-${opcionCount}`;
+                const letraOpcion = String.fromCharCode(96 + opcionCount); // a, b, c, etc.
+                
+                const opcionDiv = document.createElement('div');
+                opcionDiv.className = 'opcion';
+                
+                opcionDiv.innerHTML = `
+                    <input type="radio" name="correcta-${preguntaId}" value="${letraOpcion}" id="correcta-${opcionId}" ${opcionCount === 1 ? 'checked' : ''}>
+                    <label for="correcta-${opcionId}">Correcta</label>
+                    <input type="text" class="texto-opcion" placeholder="Texto de la opción ${letraOpcion}" data-letra="${letraOpcion}" style="width: 60%;">
+                    <button class="eliminar-opcion">🗑️</button>
+                `;
+                
+                opcionesContainer.appendChild(opcionDiv);
+                
+                // Event listeners para esta opción
+                opcionDiv.querySelector('.eliminar-opcion').addEventListener('click', function() {
+                    if (opcionesContainer.children.length > 1) {
+                        opcionesContainer.removeChild(opcionDiv);
+                        actualizarLetrasOpciones(opcionesContainer);
+                        actualizarPreview();
+                    } else {
+                        alert('Cada pregunta debe tener al menos una opción.');
+                    }
+                });
+                
+                opcionDiv.querySelector('.texto-opcion').addEventListener('input', actualizarPreview);
+                
+                actualizarPreview();
+            }
+            
+            function actualizarLetrasOpciones(opcionesContainer) {
+                const opciones = opcionesContainer.querySelectorAll('.opcion');
+                opciones.forEach((opcion, index) => {
+                    const letra = String.fromCharCode(97 + index);
+                    opcion.querySelector('input[type="radio"]').value = letra;
+                    opcion.querySelector('input[type="radio"]').id = `correcta-${opcion.id.split('-').slice(0, 2).join('-')}-${letra}`;
+                    opcion.querySelector('label').htmlFor = `correcta-${opcion.id.split('-').slice(0, 2).join('-')}-${letra}`;
+                    opcion.querySelector('.texto-opcion').dataset.letra = letra;
+                });
+            }
+            
+            function actualizarNumeracionPreguntas() {
+                const preguntas = preguntasContainer.querySelectorAll('.pregunta');
+                preguntas.forEach((pregunta, index) => {
+                    const num = index + 1;
+                    pregunta.id = `pregunta-${num}`;
+                    pregunta.querySelector('label strong').textContent = `Pregunta ${num}:`;
+                    
+                    // Actualizar los data-atributos de los botones
+                    pregunta.querySelector('.agregar-opcion').dataset.pregunta = `pregunta-${num}`;
+                    pregunta.querySelector('.eliminar-pregunta').dataset.pregunta = `pregunta-${num}`;
+                    
+                    // Actualizar el id del contenedor de opciones
+                    const opcionesContainer = pregunta.querySelector('[id^="opciones-"]');
+                    opcionesContainer.id = `opciones-pregunta-${num}`;
+                });
+            }
+            
+            function actualizarPreview() {
+                const preguntas = preguntasContainer.querySelectorAll('.pregunta');
+                let previewHTML = `<h3 class="quiz-title">${quizTitleInput.value || '🧠 Mini Quiz'}</h3>`;
+                
+                if (preguntas.length === 0) {
+                    previewHTML += '<p>No hay preguntas configuradas.</p>';
+                } else {
+                    preguntas.forEach((pregunta, index) => {
+                        const preguntaTexto = pregunta.querySelector('.texto-pregunta').value || `Pregunta ${index + 1} sin texto`;
+                        const opciones = pregunta.querySelectorAll('.opcion');
+                        
+                        previewHTML += `<p><strong>${index + 1}. ${preguntaTexto}</strong></p>`;
+                        
+                        opciones.forEach((opcion, opcionIndex) => {
+                            const letra = String.fromCharCode(97 + opcionIndex);
+                            const opcionTexto = opcion.querySelector('.texto-opcion').value || `Opción ${letra} sin texto`;
+                            const esCorrecta = opcion.querySelector('input[type="radio"]').checked;
+                            
+                            previewHTML += `
+                                <div class="${esCorrecta ? 'correct-option' : ''}">
+                                    <input type="radio" name="preview-q${index + 1}" disabled>
+                                    <label>${letra}. ${opcionTexto}</label><br>
+                                </div>
+                            `;
+                        });
+                        
+                        previewHTML += '<br>';
+                    });
+                }
+                
+                quizPreview.innerHTML = previewHTML;
+            }
+            
+            function generarCodigo() {
+                const preguntas = preguntasContainer.querySelectorAll('.pregunta');
+                let quizHTML = `<div style="padding: 15px; border: 2px solid #b30000; border-radius: 10px; background-color: #fff0f0; max-width: 600px; font-family: sans-serif;">
+  <h3 style="color: #b30000;">${quizTitleInput.value || '🧠 Mini Quiz'}</h3>\n\n`;
+                
+                // Generar HTML para cada pregunta
+                preguntas.forEach((pregunta, index) => {
+                    const preguntaTexto = pregunta.querySelector('.texto-pregunta').value || `Pregunta ${index + 1} sin texto`;
+                    const opciones = pregunta.querySelectorAll('.opcion');
+                    let respuestaCorrecta = '';
+                    
+                    quizHTML += `  <!-- Pregunta ${index + 1} -->
+  <p><strong>${index + 1}. ${preguntaTexto}</strong></p>\n`;
+                    
+                    opciones.forEach((opcion, opcionIndex) => {
+                        const letra = String.fromCharCode(97 + opcionIndex);
+                        const opcionTexto = opcion.querySelector('.texto-opcion').value || `Opción ${letra} sin texto`;
+                        
+                        if (opcion.querySelector('input[type="radio"]').checked) {
+                            respuestaCorrecta = letra;
+                        }
+                        
+                        quizHTML += `  <input type="radio" name="q${index + 1}" value="${letra}" id="q${index + 1}${letra}">
+  <label for="q${index + 1}${letra}">${opcionTexto}</label><br>\n`;
+                    });
+                    
+                    quizHTML += '<br>\n';
+                });
+                
+                // Añadir el botón y el feedback
+                quizHTML += `  <button onclick="revisarQuiz()" style="background-color: #b30000; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">Revisar respuestas</button>
+  <p id="feedbackQuiz" style="margin-top: 15px; font-weight: bold;"></p>
+</div>\n\n`;
+                
+                // Generar el JavaScript con las respuestas correctas
+                let jsCode = `<script>
+  function revisarQuiz() {
+    const respuestas = {\n`;
+                
+                preguntas.forEach((pregunta, index) => {
+                    const opciones = pregunta.querySelectorAll('.opcion');
+                    let respuestaCorrecta = '';
+                    
+                    opciones.forEach(opcion => {
+                        if (opcion.querySelector('input[type="radio"]').checked) {
+                            respuestaCorrecta = opcion.querySelector('input[type="radio"]').value;
+                        }
+                    });
+                    
+                    jsCode += `      q${index + 1}: "${respuestaCorrecta}"${index < preguntas.length - 1 ? ',' : ''}\n`;
+                });
+                
+                jsCode += `    };
+    let correctas = 0;
+    let respondidas = 0;
+    const totalPreguntas = ${preguntas.length};
 
-  <button onclick="agregarPregunta()">+ Agregar nueva pregunta</button>
-  <button onclick="generarCodigo()">🗞 Generar código</button>
-
-  <h3>Código HTML generado:</h3>
-  <textarea id="codigoGenerado" readonly></textarea>
-
-  <script>
-    let contadorPreguntas = 0;
-
-    function agregarPregunta() {
-      const form = document.getElementById('quizForm');
-      const bloque = document.createElement('div');
-      bloque.className = 'input-block';
-      bloque.innerHTML = `
-        <label>Pregunta:</label>
-        <input type="text" name="pregunta" placeholder="Escribí la pregunta">
-        <label>Opción A:</label>
-        <input type="text" name="a" placeholder="Opción A">
-        <label>Opción B:</label>
-        <input type="text" name="b" placeholder="Opción B">
-        <label>Opción C:</label>
-        <input type="text" name="c" placeholder="Opción C">
-        <label>Respuesta correcta:</label>
-        <select name="correcta">
-          <option value="a">A</option>
-          <option value="b">B</option>
-          <option value="c">C</option>
-        </select>
-      `;
-      form.appendChild(bloque);
-      contadorPreguntas++;
-    }
-
-    function generarCodigo() {
-      const bloques = document.getElementsByClassName('input-block');
-      let preguntas = [];
-      let respuestas = {};
-      let i = 1;
-      let html = `<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Mini Quiz</title><style>body{font-family:sans-serif;background:#fff0f0;padding:20px;}button{background:#b30000;color:#fff;padding:10px;border:none;border-radius:5px;}label{display:block;}#feedback{margin-top:15px;font-weight:bold;}</style></head><body><h3>Mini Quiz</h3>`;
-
-      for (let bloque of bloques) {
-        const inputs = bloque.querySelectorAll('input');
-        const select = bloque.querySelector('select');
-        const qid = `q${i}`;
-        html += `<p><strong>${i}. ${inputs[0].value}</strong></p>`;
-        html += `<input type='radio' name='${qid}' value='a' id='${qid}a'><label for='${qid}a'>${inputs[1].value}</label>`;
-        html += `<input type='radio' name='${qid}' value='b' id='${qid}b'><label for='${qid}b'>${inputs[2].value}</label>`;
-        html += `<input type='radio' name='${qid}' value='c' id='${qid}c'><label for='${qid}c'>${inputs[3].value}</label>`;
-        respuestas[qid] = select.value;
-        i++;
+    for (let q in respuestas) {
+      const opciones = document.getElementsByName(q);
+      for (let o of opciones) {
+        if (o.checked) {
+          respondidas++;
+          if (o.value === respuestas[q]) correctas++;
+        }
       }
-
-      let scriptCode = `&lt;script&gt;function revisar(){let r=${JSON.stringify(respuestas)};let c=0,t=0;for(let q in r){let ops=document.getElementsByName(q);for(let o of ops){if(o.checked){t++;if(o.value===r[q])c++;}}}document.getElementById('feedback').innerText = 'Obtuviste ' + c + ' de ' + t + ' correctas';}&lt;/script&gt;`;
-
-      html += `<button onclick='revisar()'>Revisar</button><p id='feedback'></p>${scriptCode}</body></html>`;
-
-      document.getElementById('codigoGenerado').value = html;
     }
-  </script>
+
+    const feedback = document.getElementById("feedbackQuiz");
+    if (respondidas < totalPreguntas) {
+      feedback.innerHTML = "⚠️ Asegurate de responder todas las preguntas.";
+      feedback.style.color = "#cc6600";
+    } else if (correctas === totalPreguntas) {
+      feedback.innerHTML = "🎉 ¡Excelente! ¡Respondiste todo correctamente!";
+      feedback.style.color = "green";
+    } else {
+      feedback.innerHTML = \`🔁 Respondiste correctamente \${correctas} de \${totalPreguntas}. ¡Repasá y volvé a intentarlo!\`;
+      feedback.style.color = "#b30000";
+    }
+  }
+<\/script>`;
+                
+                quizOutput.value = quizHTML + jsCode;
+            }
+            
+            function copiarCodigo() {
+                quizOutput.select();
+                document.execCommand('copy');
+                alert('¡Código copiado al portapapeles!');
+            }
+            
+            // Actualizar preview cuando cambian los textos de las preguntas
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('texto-pregunta') || 
+                    e.target.classList.contains('texto-opcion')) {
+                    actualizarPreview();
+                }
+            });
+            
+            // Actualizar preview cuando cambia la opción correcta
+            document.addEventListener('change', function(e) {
+                if (e.target.type === 'radio' && e.target.name.startsWith('correcta-')) {
+                    actualizarPreview();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
