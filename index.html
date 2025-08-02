@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Mini-Quiz 2.0</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fff0f0;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      color: #b30000;
+    }
+    .input-block {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      background-color: #b30000;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      height: 400px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Generador de Mini-Quizzes HTML</h1>
+
+  <div id="quizForm"></div>
+
+  <button onclick="agregarPregunta()">+ Agregar nueva pregunta</button>
+  <button onclick="generarCodigo()">🧾 Generar código</button>
+
+  <h3>Código HTML generado:</h3>
+  <textarea id="codigoGenerado" readonly></textarea>
+
+  <script>
+    let contadorPreguntas = 0;
+
+    function agregarPregunta() {
+      const form = document.getElementById('quizForm');
+      const bloque = document.createElement('div');
+      bloque.className = 'input-block';
+      bloque.innerHTML = `
+        <label>Pregunta:</label>
+        <input type="text" name="pregunta" placeholder="Escribí la pregunta">
+        <label>Opción A:</label>
+        <input type="text" name="a" placeholder="Opción A">
+        <label>Opción B:</label>
+        <input type="text" name="b" placeholder="Opción B">
+        <label>Opción C:</label>
+        <input type="text" name="c" placeholder="Opción C">
+        <label>Respuesta correcta:</label>
+        <select name="correcta">
+          <option value="a">A</option>
+          <option value="b">B</option>
+          <option value="c">C</option>
+        </select>
+      `;
+      form.appendChild(bloque);
+      contadorPreguntas++;
+    }
+
+    function generarCodigo() {
+      const bloques = document.getElementsByClassName('input-block');
+      let preguntas = [];
+      let respuestas = {};
+      let i = 1;
+      let html = `<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Mini Quiz</title><style>body{font-family:sans-serif;background:#fff0f0;padding:20px;}button{background:#b30000;color:#fff;padding:10px;border:none;border-radius:5px;}label{display:block;}#feedback{margin-top:15px;font-weight:bold;}</style></head><body><h3>Mini Quiz</h3>`;
+
+      for (let bloque of bloques) {
+        const inputs = bloque.querySelectorAll('input');
+        const select = bloque.querySelector('select');
+        const qid = `q${i}`;
+        html += `<p><strong>${i}. ${inputs[0].value}</strong></p>`;
+        html += `<input type='radio' name='${qid}' value='a' id='${qid}a'><label for='${qid}a'>${inputs[1].value}</label>`;
+        html += `<input type='radio' name='${qid}' value='b' id='${qid}b'><label for='${qid}b'>${inputs[2].value}</label>`;
+        html += `<input type='radio' name='${qid}' value='c' id='${qid}c'><label for='${qid}c'>${inputs[3].value}</label>`;
+        respuestas[qid] = select.value;
+        i++;
+      }
+      html += `<button onclick='revisar()'>Revisar</button><p id='feedback'></p><script>function revisar(){let r=${JSON.stringify(respuestas)};let c=0,t=0;for(let q in r){let ops=document.getElementsByName(q);for(let o of ops){if(o.checked){t++;if(o.value===r[q])c++;}}}document.getElementById('feedback').innerText = 'Obtuviste ' + c + ' de ' + t + ' correctas';}</script></body></html>`;
+
+      document.getElementById('codigoGenerado').value = html;
+    }
+  </script>
+</body>
+</html>
