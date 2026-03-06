@@ -309,11 +309,9 @@
 </div>\n\n`;
                 
                 // Generar el JavaScript con las respuestas correctas
-                let jsCode = `<script>
-  function revisarQuiz() {
-    const respuestas = {\n`;
-                
-                preguntas.forEach((pregunta, index) => {
+                // Usamos un array para guardar las respuestas correctas en orden
+                let respuestasCorrectas = [];
+                preguntas.forEach((pregunta) => {
                     const opciones = pregunta.querySelectorAll('.opcion');
                     let respuestaCorrecta = '';
                     
@@ -322,21 +320,34 @@
                             respuestaCorrecta = opcion.querySelector('input[type="radio"]').value;
                         }
                     });
-                    
-                    jsCode += `      q${index + 1}: "${respuestaCorrecta}"${index < preguntas.length - 1 ? ',' : ''}\n`;
+                    respuestasCorrectas.push(respuestaCorrecta);
                 });
-                
-                jsCode += `    };
+
+                let jsCode = `<script>
+  function revisarQuiz() {
     let correctas = 0;
     let respondidas = 0;
     const totalPreguntas = ${preguntas.length};
+    const respuestasCorrectas = ${JSON.stringify(respuestasCorrectas)};
 
-    for (let q in respuestas) {
-      const opciones = document.getElementsByName(q);
+    // Iteramos por cada pregunta (del 1 al totalPreguntas)
+    for (let i = 1; i <= totalPreguntas; i++) {
+      // Buscamos los radio buttons de la pregunta actual (q1, q2, etc.)
+      const opciones = document.getElementsByName("q" + i);
+      let respuestaUsuario = null;
+      
       for (let o of opciones) {
         if (o.checked) {
-          respondidas++;
-          if (o.value === respuestas[q]) correctas++;
+          respuestaUsuario = o.value;
+          break; // Solo necesitamos la primera opción marcada
+        }
+      }
+      
+      if (respuestaUsuario !== null) {
+        respondidas++;
+        // Comparamos la respuesta del usuario con la correcta en la posición i-1 del array
+        if (respuestaUsuario === respuestasCorrectas[i - 1]) {
+          correctas++;
         }
       }
     }
